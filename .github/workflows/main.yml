@@ -55,7 +55,7 @@ jobs:
               --title="v${{ env.NEW_VERSION }}" \
               --generate-notes
 
-build-docker-image:
+  build-docker-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -76,6 +76,6 @@ build-docker-image:
           platforms: linux/amd64,linux/arm64
           file: ./Dockerfile
           push: true
-    tags: |
-      ${{ secrets.DOCKERHUB_USERNAME }}/{{ github.repository }}:${{ env.NEW_VERSION }}
-      ${{ secrets.DOCKERHUB_USERNAME }}/{{ github.repository }}:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/{{ github.repository }}:${{ env.NEW_VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/{{ github.repository }}:latest
