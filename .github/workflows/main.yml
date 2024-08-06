@@ -78,5 +78,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ github.repository }}:${{ env.NEW_VERSION }}
-            ${{ github.repository }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]'):${{ env.NEW_VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]'):latest
