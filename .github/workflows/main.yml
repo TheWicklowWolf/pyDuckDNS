@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+    outputs:
+      new_version: ${{ steps.increment_version.outputs.new_version }}
 
     steps:
       - name: Checkout repository
@@ -39,6 +41,7 @@ jobs:
         run: |
           NEW_VERSION=$(echo ${{ env.CURRENT_VERSION }} | awk -F. '{printf("%d.%d.%d", $1, $2, $3+1)}')
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Current version: $NEW_VERSION"
           
       - name: Create new Git tag
@@ -87,5 +90,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ env.REPO_NAME }}:${{ env.NEW_VERSION }}
+            ${{ env.REPO_NAME }}:${{ needs.manage-release-version.outputs.new_version }}
             ${{ env.REPO_NAME }}:latest
