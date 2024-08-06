@@ -6,7 +6,6 @@ DuckDNS IP Updater.
 ## Run using docker-compose
 
 ```yaml
-version: "2.1"
 services:
   pyduckdns:
     image: thewicklowwolf/pyduckdns:latest
