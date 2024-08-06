@@ -1,12 +1,61 @@
 name: ci
-
+    
 on:
   push:
     branches:
-      - "main"
+      - main
+    paths-ignore:
+      - '**/*.md'
 
 jobs:
-  build:
+  manage-release-version:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+        
+      - name: Get tags
+        run: git fetch --tags origin
+
+      - name: List all Git tags
+        run: |
+          echo "Listing all tags:"
+          git tag --list
+          
+      - name: Get current version
+        id: get_version
+        run: |
+          VERSION=$(git tag --list --sort=-v:refname | head -n 1 | sed 's/^v//')
+          echo "CURRENT_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Current version: $VERSION"
+
+      - name: Increment version
+        id: increment_version
+        run: |
+          NEW_VERSION=$(echo ${{ env.CURRENT_VERSION }} | awk -F. '{printf("%d.%d.%d", $1, $2, $3+1)}')
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "Current version: $NEW_VERSION"
+          
+      - name: Create new Git tag
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a v${{ env.NEW_VERSION }} -m "Release version ${{ env.NEW_VERSION }}"
+          git push origin --tags
+
+      - name: Create release
+        run: |
+          gh release create "v${{ env.NEW_VERSION }}" \
+              --repo="${GITHUB_REPOSITORY}" \
+              --title="v${{ env.NEW_VERSION }}" \
+              --generate-notes
+
+build-docker-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,4 +76,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/pyduckdns:latest
+    tags: |
+      ${{ secrets.DOCKERHUB_USERNAME }}/{{ github.repository }}:${{ env.NEW_VERSION }}
+      ${{ secrets.DOCKERHUB_USERNAME }}/{{ github.repository }}:latest
