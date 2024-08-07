@@ -1,5 +1,5 @@
 name: ci
-    
+
 on:
   push:
     branches:
@@ -20,19 +20,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
-        
-      - name: Get tags
-        run: git fetch --tags origin
 
-      - name: List all Git tags
+      - name: Fetch and list tags
         run: |
-          echo "Listing all tags:"
+          git fetch --tags
+          echo "Tags:"
           git tag --list
-          
+
       - name: Get current version
         id: get_version
         run: |
-          VERSION=$(git tag --list --sort=-v:refname | head -n 1 | sed 's/^v//')
+          VERSION=$(git tag --list | sed 's/^v//' | awk -F. '{ if (NF == 2) printf("%s.0.%s\n", $1, $2); else print $0 }' | sort -V | tail -n 1 | sed 's/^/v/')
           echo "CURRENT_VERSION=$VERSION" >> $GITHUB_ENV
           echo "Current version: $VERSION"
 
@@ -42,8 +40,8 @@ jobs:
           NEW_VERSION=$(echo ${{ env.CURRENT_VERSION }} | awk -F. '{printf("%d.%d.%d", $1, $2, $3+1)}')
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Current version: $NEW_VERSION"
-          
+          echo "New version: $NEW_VERSION"
+
       - name: Create new Git tag
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -76,7 +74,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
       - name: Convert repository name to lowercase
         id: lowercase_repo
         run: |
@@ -95,4 +93,3 @@ jobs:
           tags: |
             ${{ env.REPO_NAME }}:${{ needs.bump-version-and-create-release-tag.outputs.new_version }}
             ${{ env.REPO_NAME }}:latest
-
