@@ -1,11 +1,16 @@
 FROM python:3.12-alpine
 
+# Set build arguments
+ARG RELEASE_VERSION
+ENV RELEASE_VERSION=${RELEASE_VERSION}
+
 # Create User
 ARG UID=1001
 ARG GID=1001
 RUN addgroup -g $GID general_user && \
     adduser -D -u $UID -G general_user -s /bin/sh general_user
 
+# Move Files
 COPY . /pyduckdns
 WORKDIR /pyduckdns
 
