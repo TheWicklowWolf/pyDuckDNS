@@ -9,9 +9,9 @@ logger = logging.getLogger()
 
 app_name_text = os.path.basename(__file__).replace(".py", "")
 release_version = os.environ.get("RELEASE_VERSION", "unknown")
-logger.warning(f"{'*' * 50}\n")
-logger.warning(f"{app_name_text} Version: {release_version}\n")
-logger.warning(f"{'*' * 50}")
+logger.info(f"{'*' * 50}\n")
+logger.info(f"{app_name_text} Version: {release_version}\n")
+logger.info(f"{'*' * 50}")
 
 api_endpoints = ["https://api.ipify.org", "http://wtfismyip.com/text"]
 domains = os.environ.get("domains", "domainB,domainA")
